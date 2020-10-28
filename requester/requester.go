@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/http/httptrace"
 	"net/url"
@@ -72,6 +73,9 @@ type Work struct {
 
 	// Qps is the rate limit in queries per second.
 	QPS float64
+
+	// QpsSlope is the time over which QPS should be ramped up
+	QpsSlope float64
 
 	// DisableCompression is an option to disable compression in response
 	DisableCompression bool
@@ -211,15 +215,14 @@ func (b *Work) makeRequest(c *http.Client) {
 
 func (b *Work) runWorker(client *http.Client, n int) {
 	var throttle <-chan time.Time
-	if b.QPS > 0 {
-		throttle = time.Tick(time.Duration(1e6/(b.QPS)) * time.Microsecond)
-	}
 
 	if b.DisableRedirects {
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}
 	}
+	s := 0.
+	qps := 0.
 	for i := 0; i < n; i++ {
 		// Check if application is stopped. Do not send into a closed channel.
 		select {
@@ -227,6 +230,13 @@ func (b *Work) runWorker(client *http.Client, n int) {
 			return
 		default:
 			if b.QPS > 0 {
+				if qps < b.QPS || s < b.QpsSlope {
+					s = now().Seconds()
+					// slowly ramp up QPS, but use at least s=1 to avoid the division
+					// yielding too large results
+					qps := math.Min(b.QPS * math.Max(s, 1) / b.QpsSlope, b.QPS)
+					throttle = time.Tick(time.Duration(1e6/(qps)) * time.Microsecond)
+				}
 				<-throttle
 			}
 			b.makeRequest(client)

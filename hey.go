@@ -53,7 +53,7 @@ var (
 	c = flag.Int("c", 50, "")
 	n = flag.Int("n", 200, "")
 	q = flag.Float64("q", 0, "")
-	s = flag.Float64("s", 0, "")
+	s = flag.Duration("s", 0, "")
 	t = flag.Int("t", 20, "")
 	z = flag.Duration("z", 0, "")
 
@@ -120,6 +120,7 @@ func main() {
 	num := *n
 	conc := *c
 	q := *q
+	s := s.Seconds()
 	dur := *z
 
 	if dur > 0 {
@@ -220,7 +221,7 @@ func main() {
 		N:                  num,
 		C:                  conc,
 		QPS:                q,
-		QPSSlope:           s,
+		QpsSlope:           s,
 		Timeout:            *t,
 		DisableCompression: *disableCompression,
 		DisableKeepAlives:  *disableKeepAlives,
