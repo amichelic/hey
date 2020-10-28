@@ -53,6 +53,7 @@ var (
 	c = flag.Int("c", 50, "")
 	n = flag.Int("n", 200, "")
 	q = flag.Float64("q", 0, "")
+	s = flag.Float64("s", 0, "")
 	t = flag.Int("t", 20, "")
 	z = flag.Duration("z", 0, "")
 
@@ -72,6 +73,7 @@ Options:
   -c  Number of workers to run concurrently. Total number of requests cannot
       be smaller than the concurrency level. Default is 50.
   -q  Rate limit, in queries per second (QPS) per worker. Default is no rate limit.
+  -s  Ramp up QPS over time (seconds until full QPS). Default is 0.
   -z  Duration of application to send requests. When duration is reached,
       application stops and exits. If duration is specified, n is ignored.
       Examples: -z 10s -z 3m.
@@ -218,6 +220,7 @@ func main() {
 		N:                  num,
 		C:                  conc,
 		QPS:                q,
+		QPSSlope:           s,
 		Timeout:            *t,
 		DisableCompression: *disableCompression,
 		DisableKeepAlives:  *disableKeepAlives,

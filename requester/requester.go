@@ -38,6 +38,7 @@ type result struct {
 	err           error
 	statusCode    int
 	offset        time.Duration
+	startTime     time.Time
 	duration      time.Duration
 	connDuration  time.Duration // connection setup(DNS lookup + Dial up) duration
 	dnsDuration   time.Duration // dns lookup duration
@@ -146,6 +147,7 @@ func (b *Work) Finish() {
 
 func (b *Work) makeRequest(c *http.Client) {
 	s := now()
+	reqStartTime := time.Now()
 	var size int64
 	var code int
 	var dnsStart, connStart, resStart, reqStart, delayStart time.Duration
@@ -193,6 +195,7 @@ func (b *Work) makeRequest(c *http.Client) {
 	resDuration = t - resStart
 	finish := t - s
 	b.results <- &result{
+		startTime:     reqStartTime,
 		offset:        s,
 		statusCode:    code,
 		duration:      finish,

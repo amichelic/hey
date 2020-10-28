@@ -31,6 +31,7 @@ The comma-separated CSV format is proceeded by a header, and consists of the fol
 6. Response-read:	Time taken to read full response (in seconds)
 7. status-code:		HTTP status code of the response (e.g. 200)
 8. offset:			The time since the start of the benchmark when the request was started. (in seconds)
+9. unix-time:		The time the request was started. (unix timestamp)
 */
 package requester
 
@@ -123,6 +124,6 @@ Status code distribution:{{ range $code, $num := .StatusCodeDist }}
 {{ if gt (len .ErrorDist) 0 }}Error distribution:{{ range $err, $num := .ErrorDist }}
   [{{ $num }}]	{{ $err }}{{ end }}{{ end }}
 `
-	csvTmpl = `{{ $connLats := .ConnLats }}{{ $dnsLats := .DnsLats }}{{ $dnsLats := .DnsLats }}{{ $reqLats := .ReqLats }}{{ $delayLats := .DelayLats }}{{ $resLats := .ResLats }}{{ $statusCodeLats := .StatusCodes }}{{ $offsets := .Offsets}}response-time,DNS+dialup,DNS,Request-write,Response-delay,Response-read,status-code,offset{{ range $i, $v := .Lats }}
-{{ formatNumber $v }},{{ formatNumber (index $connLats $i) }},{{ formatNumber (index $dnsLats $i) }},{{ formatNumber (index $reqLats $i) }},{{ formatNumber (index $delayLats $i) }},{{ formatNumber (index $resLats $i) }},{{ formatNumberInt (index $statusCodeLats $i) }},{{ formatNumber (index $offsets $i) }}{{ end }}`
+	csvTmpl = `{{ $connLats := .ConnLats }}{{ $dnsLats := .DnsLats }}{{ $dnsLats := .DnsLats }}{{ $reqLats := .ReqLats }}{{ $delayLats := .DelayLats }}{{ $resLats := .ResLats }}{{ $statusCodeLats := .StatusCodes }}{{ $offsets := .Offsets}}{{ $unixtimes := .UnixTimes }}response-time,DNS+dialup,DNS,Request-write,Response-delay,Response-read,status-code,offset,unix-time{{ range $i, $v := .Lats }}
+{{ formatNumber $v }},{{ formatNumber (index $connLats $i) }},{{ formatNumber (index $dnsLats $i) }},{{ formatNumber (index $reqLats $i) }},{{ formatNumber (index $delayLats $i) }},{{ formatNumber (index $resLats $i) }},{{ formatNumberInt (index $statusCodeLats $i) }},{{ formatNumber (index $offsets $i) }},{{ formatNumber (index $unixtimes $i) }}{{ end }}`
 )
